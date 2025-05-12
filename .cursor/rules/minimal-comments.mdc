@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Only add comments to the code if it is absolutely necessary to understand the code logic

@@ -33,10 +33,10 @@ these (implicit) links and add them to the Graph that is built by HippoRAG 2.
 
 1.  **Website Scraping & Metadata Extraction:**
 
-    - (1 day) Create a metadata.csv file with the following columns: Category, Subcategory, Title, Text, Valid From, Valid To. Save the metadata.csv file in the data/raw folder.
-    - (1 day) Download the PDFs and save them in the data/raw folder. Add the path to each file to the metadata.csv file
+    - [x] (1 day) Create a metadata.csv file with the following columns: Category, Subcategory, URL, Title, Text, Valid From, Valid To. Save the metadata.csv file in the data/raw folder.
+    - [x] (1 day) Download the PDFs and save them in the data/raw folder. Add the path to each file to the metadata.csv file
     - (2 days) Use an LLM to infer the validity period of the agreement based on the text of the agreement.
-    - (1 day) Test using browser-use library to scrape the data --> It sucks so FAR!
+    - [x] (1 day) Test using browser-use library to scrape the data --> It sucks so FAR!
 
 2.  **PDF Conversion & Chunking:**
 

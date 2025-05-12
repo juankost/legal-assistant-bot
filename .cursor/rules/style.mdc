@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Do not try to fix errors about line length when the error is caused in a multiline comment block
+- Do not add comments to the code, unless absolutely necessary to understand the code logic
