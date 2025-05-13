@@ -1,12 +1,16 @@
 import requests
 import google.genai as genai
+import tqdm
 import os
 import pandas as pd
 import json
 from dotenv import load_dotenv
 import logging
+import sys
 from bs4 import BeautifulSoup
-from prompts import (
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from scraper.prompts import (
     PROMPT_EXTRACT_CATEGORY_URLS_STRUCT,
     PROMPT_EXTRACT_PDF_URLS_STRUCT,
 )
@@ -254,10 +258,41 @@ def extract_agreements_metadata():
         agreements_data["url"] = url_link
         all_agreements_data.append(agreements_data)
 
+    # Combine all collected data
     all_agreements_data = pd.concat(all_agreements_data)
-    all_agreements_data.to_csv(f"{DATA_DIR}/raw/agreement_metadata.csv", index=False)
+
+    # Add agreement_id column
+    all_agreements_data["agreement_id"] = range(len(all_agreements_data))
+
+    # Save to CSV
+    output_path = f"{DATA_DIR}/raw/agreement_metadata.csv"
+    all_agreements_data.to_csv(output_path, index=False)
+    logging.info(f"Saved {len(all_agreements_data)} agreements to {output_path}")
+
     return all_agreements_data
 
 
+def download_agreements(agreement_metadata_path):
+    """
+    Download the agreements from the URLs in the agreement_metadata DataFrame.
+    Update the agreement_metadata.csv file with the path to the downloaded PDF.
+    """
+
+    data = pd.read_csv(agreement_metadata_path)
+    output_paths = []
+    for index, row in tqdm.tqdm(data.iterrows()):
+        url = row["agreement_url"]
+        response = requests.get(url)
+
+        output_path = f"{DATA_DIR}/raw/{url.split('/')[-1]}"
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+        output_paths.append(output_path)
+
+    data["raw_path"] = output_paths
+    data.to_csv(agreement_metadata_path, index=False)
+
+
 if __name__ == "__main__":
-    extract_agreements_metadata()
+    # extract_agreements_metadata()
+    download_agreements(f"{DATA_DIR}/raw/agreement_metadata.csv")

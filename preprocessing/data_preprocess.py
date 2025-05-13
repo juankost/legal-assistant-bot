@@ -1,22 +1,25 @@
-from mistralai import Mistral
+import pandas as pd
 import os
-import re
 import sys
-from openai import OpenAI
-from pydantic import BaseModel
+import logging
+from mistralai import Mistral
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import retry_on_error
+from utils import retry_on_error  # noqa: E402
+from scraper.llm_scraper import call_gemini  # noqa: E402
+from preprocessing.prompts import AGREEMENT_VALIDITY_PROMPT  # noqa: E402
+
+DATA_DIR = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data"
 
 
 @retry_on_error()
-def get_markdown_from_pdf(file_path):
+def convert_pdf_to_markdown(pdf_path, markdown_path):
 
     client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
     uploaded_pdf = client.files.upload(
         file={
-            "file_name": file_path,
-            "content": open(file_path, "rb"),
+            "file_name": pdf_path,
+            "content": open(pdf_path, "rb"),
         },
         purpose="ocr",
     )
@@ -33,156 +36,199 @@ def get_markdown_from_pdf(file_path):
     for page in ocr_response.pages:
         markdown_text += page.markdown
 
-    return markdown_text
-
-
-def call_openai(system_prompt: str, prompt: str, output_schema: BaseModel):
-
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.0,
-        max_tokens=16384,
-        response_format=output_schema,
-    )
-
-    message = completion.choices[0].message
-    if message.parsed:
-        return message.parsed
-    else:
-        print(message.refusal)
-        raise TypeError(message.refusal)
-
-
-def convert_pdf_to_markdown(file_path, output_dir):
-    file_name = os.path.basename(file_path)
-    print(
-        file_name,
-        file_name.split(".pdf")[0],
-        os.path.join(output_dir, file_name.split(".pdf")[0] + ".md"),
-    )
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    markdown_text = get_markdown_from_pdf(file_path)
-    with open(os.path.join(output_dir, file_name.split(".pdf")[0] + ".md"), "w") as f:
+    with open(markdown_path, "w") as f:
         f.write(markdown_text)
-
-
-def chunk_markdown(markdown_text, file_path):
-    # Chunk based on \n\n or based on # type of identifiers which in Markdown represent titles
-    chunks = markdown_text.split("\n")
-    refined_chunks = []
-    for chunk in chunks:
-        split_chunk = re.split(r"(?=#+\s)", chunk.strip())
-        for el in split_chunk:
-            if len(el) > 0:
-                refined_chunks.append(el)
-    return refined_chunks
-
-
-def extract_identifiers(text_chunk):
-
-    system_prompt = """You are a precise legal document structure analyzer. 
-
-You must:
-- Be extremely precise in pattern recognition
-- Follow the exact output schema provided
-- Return null values when appropriate
-- Consider context and legal document structure conventions
-- Maintain consistency in classification across similar patterns
-
-You must not:
-- Modify or normalize the original text
-- Create identifiers where none exist"""
-
-    prompt = """You are given an excerpt in markdown format from a legal text and your task is to determine if the input text contains a hierarchical level identifier. 
-    Hierarchical level identifiers denote the structure of the text, indicating if the excerpt is a title, subtitle, or paragraph.
-
-    
-    1.IDENTIFIER LEVELS:
-    Level 1 (Main Sections): start with markdown title characters, i.e. one or more # symbols    
-    Level 2 (Major Subsections): Start with capital letters, i.e. A, B, C, etc.
-    Level 3 (Numbered Items): Start with numbers in parentheses    
-    Level 4 (Lowercase Letters): Start with lowercase letters in parenthesis
-    Level 5 (Roman Numerals): STart with roman numerals in parenthesis
-    Level 6 (Special Cases): Any other structured identifiers that don't fit the above patterns
-    ###################################################################
-
-    2. OUTPUT FORMAT
-    You will return a JSON object with the following schema:
-    {{
-        "reasoning": string,  # your reasoning for the classification, which part of the input text made you infer that it is an identifier
-        "contains_identifier": boolean,  # true if the text contains any hierarchical identifier
-        "identifier_level": integer | null,  # level 1-6, or null if no identifier
-        "identifier": string,  # Part of text that represents the identifier (e.g. "## 2. ", "### Title", "A.", "1.", etc.)
-        "identifier_text": string | null,  # If there is a title, return the title text
-        "confidence": float  # your confidence in the classification (0.0 to 1.0)
-    }}
-    ###################################################################
-
-    3. RULES:
-    -  Return null for identifier_level if contains_identifier is false
-    -  Extract only the identifier portion, not the full content
-    -  If the identifier has a title, return the title text
-    -  If multiple identifiers exist, choose the most prominent one
-    ###################################################################
-
-
-    TEXT TO BE ANALYZED:
-    {text_chunk}
-    
-    Answer in JSON format, related to the TEXT TO BE ANALYZED:
-    """
-
-    class Identifier(BaseModel):
-        contains_identifier: bool
-        identifier_level: int | None
-        identifier: str
-        identifier_text: str | None
-        confidence: float
-        reasoning: str
-
-    return call_openai(system_prompt, prompt.format(text_chunk=text_chunk), Identifier)
-
-
-def consolidate_chunks(chunks):
-    # Artifact of the pdf -> markdown conversion
-    # If there are two consecutive chunks with the same level of identifier, they likely belong to the same "title" and
-    # we can join them together.
-
-    # Otherwise, we propagate the latest identifier to the next chunk. Each level is propagated
-    # only until a new higher level identifier is found.
-
-    # Create the uid for the chunks here
 
     return
 
 
+def process_agreement_pdfs(agreements_path, output_dir):
+    data = pd.read_csv(agreements_path)
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    markdown_paths = []
+    for idx, row in data.iterrows():
+        if "raw_path" not in row or not row["raw_path"] or pd.isna(row["raw_path"]):
+            print(f"Skipping row {idx}: No valid raw_path found")
+            markdown_paths.append(None)
+            continue
+
+        pdf_path = row["raw_path"]
+        if not os.path.exists(pdf_path):
+            print(f"Skipping {pdf_path}: File not found")
+            markdown_paths.append(None)
+            continue
+
+        print(f"Processing PDF {idx+1}/{len(data)}: {pdf_path}")
+        file_name = os.path.basename(p=pdf_path).split(".pdf")[0] + ".md"
+        markdown_path = os.path.join(output_dir, file_name)
+        logging.info(f"Converting {pdf_path} to {markdown_path}")
+
+        convert_pdf_to_markdown(pdf_path, markdown_path)
+        markdown_paths.append(markdown_path)
+
+    data["markdown_path"] = markdown_paths
+    data.to_csv(agreements_path, index=False)
+    print(f"Updated {agreements_path} with markdown file paths")
+
+
+def add_agreement_id_to_metadata(agreements_csv_path):
+    """
+    Adds a unique agreement_id column to the agreement metadata CSV if it doesn't exist.
+
+    Args:
+        agreements_csv_path: Path to the agreement metadata CSV file
+    """
+    data = pd.read_csv(agreements_csv_path)
+
+    if "agreement_id" not in data.columns:
+        print("Adding agreement_id column to metadata")
+        data["agreement_id"] = range(len(data))
+        data.to_csv(agreements_csv_path, index=False)
+        print(f"Updated {agreements_csv_path} with agreement_id column")
+    else:
+        print("agreement_id column already exists in metadata")
+
+    return data
+
+
+def get_agreements_validity_period(agreements_csv_path, overwrite=False):
+    """
+    Analyze agreement documents to determine validity periods and relationships.
+
+    Args:
+        agreements_csv_path: Path to CSV file containing agreement metadata
+        overwrite: If True, re-process agreements even if they were already analyzed
+
+    Returns:
+        DataFrame containing the analysis results
+    """
+    # First ensure we have agreement_ids in the metadata
+    data = add_agreement_id_to_metadata(agreements_csv_path)
+
+    # Define output path for results
+    output_path = os.path.join(
+        os.path.dirname(agreements_csv_path), "agreement_validity_analysis.csv"
+    )
+
+    # Load existing results if file exists
+    if os.path.exists(output_path):
+        results_df = pd.read_csv(output_path)
+        processed_ids = set(results_df["agreement_id"])
+        print(f"Found existing analysis file with {len(processed_ids)} agreements")
+    else:
+        results_df = pd.DataFrame(
+            columns=[
+                "agreement_id",
+                "agreement_title",
+                "validity_from",
+                "valid_to",
+                "impacted_agreements",
+            ]
+        )
+        processed_ids = set()
+        print("Starting new analysis file")
+
+    for _, row in data.iterrows():
+        agreement_id = row["agreement_id"]
+
+        # Skip if already processed and overwrite is False
+        if agreement_id in processed_ids and not overwrite:
+            print(
+                f"Skipping agreement {agreement_id}: Already processed (use overwrite=True to re-process)"
+            )
+            continue
+
+        if "markdown_path" not in row or not row["markdown_path"] or pd.isna(row["markdown_path"]):
+            print(f"Skipping agreement {agreement_id}: No valid markdown_path found")
+            continue
+
+        markdown_path = row["markdown_path"]
+        if not os.path.exists(markdown_path):
+            print(f"Skipping {markdown_path}: File not found")
+            continue
+
+        print(f"Processing agreement {agreement_id}: {row['agreement_title']}")
+
+        # Read the markdown content (first 10k characters only)
+        with open(markdown_path, "r") as f:
+            agreement_text = f.read(10000)
+
+        # Get all agreement titles for reference
+        all_agreements_titles = data["agreement_title"].dropna().tolist()
+
+        # Create prompt for LLM
+        formatted_titles = "\n".join([f"- {title}" for title in all_agreements_titles])
+        prompt = AGREEMENT_VALIDITY_PROMPT.format(
+            title=row["agreement_title"],
+            info=row.get("agreement_info", ""),
+            text=agreement_text,
+            all_titles=formatted_titles,
+        )
+
+        # Call Gemini to analyze the agreement
+        response_schema = {
+            "type": "object",
+            "properties": {
+                "validity_from": {"type": "string"},
+                "valid_to": {"type": "string"},
+                "impacted_agreements": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["validity_from", "valid_to", "impacted_agreements"],
+        }
+
+        analysis = call_gemini(
+            prompt=prompt,
+            model_name="gemini-2.5-pro-preview-03-25",
+            response_schema=response_schema,
+        )
+
+        if analysis:
+            # Add analysis to results
+            result = {
+                "agreement_id": agreement_id,
+                "agreement_title": row["agreement_title"],
+                "validity_from": analysis.get("validity_from", ""),
+                "valid_to": analysis.get("valid_to", ""),
+                "impacted_agreements": analysis.get("impacted_agreements", []),
+            }
+
+            # Remove existing entry if overwrite is True
+            if agreement_id in processed_ids and overwrite:
+                results_df = results_df[results_df["agreement_id"] != agreement_id]
+
+            # Add new result to DataFrame
+            new_row = pd.DataFrame([result])
+            results_df = pd.concat([results_df, new_row], ignore_index=True)
+
+            # Save results after each agreement
+            results_df.to_csv(output_path, index=False)
+            processed_ids.add(agreement_id)
+
+            print(
+                f"  Analysis complete: Valid from {result['validity_from']} to {result['valid_to']}"
+            )
+            if result["impacted_agreements"]:
+                impacted = ", ".join(result["impacted_agreements"][:2])
+                if len(result["impacted_agreements"]) > 2:
+                    impacted += f" and {len(result['impacted_agreements'])-2} more"
+                print(f"  Impacts {len(result['impacted_agreements'])} agreements: {impacted}")
+        else:
+            print(f"  Failed to analyze agreement {row['agreement_title']}")
+
+    print(f"Analysis complete. Results saved to {output_path}")
+    return results_df
+
+
 if __name__ == "__main__":
+    agreements_path = os.path.join(DATA_DIR, "raw", "agreement_metadata.csv")
+    output_dir = os.path.join(DATA_DIR, "markdown")
 
-    # original_version_file_path = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data/2014-2018_network_television_code_v13.pdf"
-    amendment_file_path = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data/changes/2018MOA-TV-National-Code_0.pdf"
-    output_dir = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data/markdown"
+    # Add agreement_id to the metadata if needed
+    add_agreement_id_to_metadata(agreements_path)
 
-    # if not os.path.join(output_dir, "2014-2018_network_television_code_v13.md"):
-    #     print("Converting PDF to markdown")
-    #     convert_pdf_to_markdown(file_path=amendment_file_path, output_dir=output_dir)
-
-    with open(
-        os.path.join(output_dir, "2014-2018_network_television_code_v13.md"),
-        "r",
-    ) as f:
-        markdown_text = f.read()
-
-    print("Chunking markdown")
-    chunked_markdown = chunk_markdown(markdown_text, file_path=amendment_file_path)
-
-    print("Number of chunks: ", len(chunked_markdown))
-    for idx in range(0, len(chunked_markdown), 400):
-        print(chunked_markdown[idx])
-        print(extract_identifiers(chunked_markdown[idx]))
-        print("-" * 100)
+    # Process agreements
+    # process_agreement_pdfs(agreements_path, output_dir)
+    get_agreements_validity_period(agreements_path, overwrite=False)
