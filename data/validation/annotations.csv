@@ -1,0 +1,2 @@
+agreement_id,agreement_title,category,llm_validity_from,human_validity_from_is_correct,human_validity_from_corrected,llm_valid_to,human_valid_to_is_correct,human_valid_to_corrected,llm_impacted_agreements,human_impacted_agreements_is_correct,human_impacted_agreements_corrected,annotation_notes,last_annotated_timestamp
+0,2022 Commercials Contract Memorandum of Agreement,Commercials,2022/04/01,True,,2025/03/31,True,,[],False,"[""2019 Commercials Contract Memorandum of Agreement""]",,2025-05-14T08:30:33.902680

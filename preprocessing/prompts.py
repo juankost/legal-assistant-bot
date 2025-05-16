@@ -26,7 +26,7 @@ Please analyze the information and extract:
 
 3. IMPACTED_AGREEMENTS: Which agreements does this document modify or impact?
    - If this is a memorandum of agreement, it likely modifies an existing agreement
-   - Look for mentions of previous agreements or amendments or agreed changes to existing agreements
+   - Look for mentions of previous agreements or amendments or agreed changes to existing agreements or agreements incorporated
    - Use the provided list of all agreement titles to match exact names
    - Return an empty list if no agreements are impacted
 

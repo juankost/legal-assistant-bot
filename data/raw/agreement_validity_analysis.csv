@@ -1,0 +1,140 @@
+agreement_id,agreement_title,validity_from,valid_to,impacted_agreements
+0,2022 Commercials Contract Memorandum of Agreement,2022/04/01,2025/03/31,['2020 SAG-AFTRA/JPC Commercials Low Budget Digital Waiver']
+1,2023 Low Budget Digital Waiver (LBDW),2023/04/01,2024/03/31,['2020 SAG-AFTRA/JPC Commercials Low Budget Digital Waiver']
+2,2024 Low Budget Digital Waiver (LBDW),2024/06/27,2025/03/31,"['2022 Commercials Contract Memorandum of Agreement', '2023 Low Budget Digital Waiver (LBDW)']"
+3,2022 National Cable Waiver,2022/12/22,,['2022 Commercials Contract Memorandum of Agreement']
+4,2022 Political Commercial Waiver,2022/XX/XX,,[]
+5,2020 SAG-AFTRA/JPC Commercials Low Budget Digital Waiver,2020/XX/XX,2022/03/31,[]
+6,Diginet Waiver,2021/01/01,2022/03/31,[]
+7,2016 Commercials Contract E-Book,2016/04/01,2019/03/31,[]
+8,2022 Influencer-Produced Sponsored Content Waiver,2021/XX/XX,2025/03/31,['2016 Commercials Contract E-Book']
+9,JPC & SAG-AFTRA Covid Modifications,2022/12/05,,['Amended COVID‐19 Commercial Production Safety and Testing Protocols']
+10,Termination of the COVID-19 Commercial Production Safety and Testing Protocol Agreement,2023/05/11,,"['Extension to the COVID-19 Commercial Production Safety and Testing Protocol Agreement', 'Amended COVID‐19 Commercial Production Safety and Testing Protocols']"
+11,Extension to the COVID-19 Commercial Production Safety and Testing	 Protocol Agreement,2022/12/21,2023/03/31,['Amended COVID‐19 Commercial Production Safety and Testing Protocols']
+12,Amended COVID‐19 Commercial Production Safety and Testing Protocols,2022/09/01,,"['Commercial Safety Protocols', '2022 Commercials Contract Memorandum of Agreement']"
+13,Commercial Safety Protocols,2021/04/19,2022/03/31,['2016 Commercials Contract E-Book']
+14,COVID-19 Protocols for In-Person Commercial Auditions,2021/09/09,,['2016 Commercials Contract E-Book']
+15,2022 Audio Commercials Contract Memorandum of Agreement,2022/04/01,2025/03/31,['2019 Audio Commercials Contract Memorandum of Agreement']
+16,Dynamic Audio Waiver,XXXX/XX/XX,,['2022 Audio Commercials Contract Memorandum of Agreement']
+17,Dynamic A.I. Audio Commercials Waiver,XX/XX/XX,,['2022 Audio Commercials Contract Memorandum of Agreement']
+18,2022 SAG-AFTRA Jingle Agreement,2022/04/01,2025/03/31,['2022 Commercials Contract Memorandum of Agreement']
+19,2016 Audio Commercials Contract E-Book,2016/04/01,2019/03/31,[]
+20,2019 Audio Commercials Contract Memorandum of Agreement,2019/04/01,2022/03/31,['2016 Audio Commercials Contract E-Book']
+21,2022 Corporate Educational and Non-Broadcast Contract Ebook,2022/11/01,2025/XX/XX,"['2022 Commercials Contract Memorandum of Agreement', '2022 Audio Commercials Contract Memorandum of Agreement', 'COVID-19 Production Safety and Testing Protocol Agreement for Corporate-Educational and Non-Broadcast Contracts']"
+22,12/21/22 Extension to the COVID-19 Co/Ed & Non-Broadcast Contract Production Safety & Testing Protocol Agreement,2022/12/21,2023/03/31,['COVID-19 Production Safety and Testing Protocol Agreement for Corporate-Educational and Non-Broadcast Contracts']
+23,Notice of Termination of Co-Ed COVID Protocols 2023,2023/05/11,2023/07/31,['COVID-19 Production Safety and Testing Protocol Agreement for Corporate-Educational and Non-Broadcast Contracts']
+24,COVID-19 Production Safety and Testing Protocol Agreement for Corporate-Educational and Non-Broadcast Contracts,2022/01/07,2022/12/31,['2022 Corporate Educational and Non-Broadcast Contract Ebook']
+25,2022 Corporate-Educational & Non-Broadcast Print Campaign Waiver,2022/XX/XX,,['2022 Corporate Educational and Non-Broadcast Contract Ebook']
+26,Corporate/Educational & Non-Broadcast Auto/Trade Show Waiver,XX/XX/XX,,[]
+27,2022 Atlanta Local Corporate-Educational Code,2022/XX/XX,,['2022 Corporate Educational and Non-Broadcast Contract Ebook']
+28,2022 Arizona-Utah Local Corporate-Educational Code,2022/XX/XX,,['2022 Corporate Educational and Non-Broadcast Contract Ebook']
+29,2022 Chicago Local Corporate-Educational Code,2022/XX/XX,,"['2022 Corporate Educational and Non-Broadcast Contract Ebook', 'Corporate/Educational & Non-Broadcast Auto/Trade Show Waiver', '2022 Corporate-Educational & Non-Broadcast Print Campaign Waiver']"
+30,2022 Hawaii Local Corporate-Educational Code,2022/XX/XX,,['2022 Corporate Educational and Non-Broadcast Contract Ebook']
+31,Modified Dubbing Agreement,2021/XX/XX,,['2014 SAG-AFTRA Basic Agreement']
+32,Spanish Language Modification (Dubbing) Agreement,XXXX/XX/XX,,['2014 SAG-AFTRA Basic Agreement']
+33,Netflix Dubbing Agreement,2019/11/01,,[]
+34,Negotiated Dubbing Employers Agreement,2023/01/28,2026/12/31,['2014 SAG-AFTRA Basic Agreement']
+35,Netflix Agreement MOA,2022/08/02,,"['Netflix Agreement MOA', '2020 Theatrical/Television MOA', 'Netflix Dubbing Agreement']"
+36,2024 Tiered-Budget Independent Interactive Media Agreemen,2024/01/01,2027/12/31,[]
+37,2024 Independent Interactive Localization Agreement,2024/01/01,2027/12/31,['2024 SAG-AFTRA Independent Interactive Media Agreement']
+38,Interim Interactive Media Agreement,2024/07/26,2025/11/08,"['2011-2014 AFTRA Interactive Media Agreement (base agreement)', '2017 Interactive Media Memorandum of Agreement (2017 updates)', '2020 Interactive Media Memorandum of Agreement (2020 updates)']"
+39,2011-2014 AFTRA Interactive Media Agreement (base agreement),2011/07/01,2014/12/31,[]
+40,2017 Interactive Media Memorandum of Agreement (2017 updates),2017/11/08,2020/11/07,['2011-2014 AFTRA Interactive Media Agreement (base agreement)']
+41,2020 Interactive Media Memorandum of Agreement (2020 updates),2020/11/08,2022/11/07,['2017 Interactive Media Memorandum of Agreement (2017 updates)']
+42,2020 Interactive Localization Agreement,2020/XX/XX,2022/11/13,"['AFTRA 2011-2014 Interactive Media Agreement (base agreement)', '2017 Interactive Media Memorandum of Agreement (2017 updates)', '2020 Interactive Media Memorandum of Agreement (2020 updates)']"
+43,Interim Interactive Media Localization Agreement,XXXX/XX/XX,2022/11/13,['Interim Interactive Media Agreement']
+44,2017 Music Video Agreement Memorandum,2017/05/01,2019/04/30,"['2012 Music Video Supplement to Sound Recordings Code', '2015-2017 Sound Recordings Code MOA']"
+45,2012 Music Video Agreement,2012/XX/XX,2014/12/31,[]
+46,2021-2026 Sound Recordings Code MOA,2024/04/06,2026/12/31,"['2002-2006 Sound Recordings Code', 'Sound Recordings Code Appendix on Artificial Intelligence']"
+47,Sound Recordings Code Appendix on Artificial Intelligence,2021/XX/XX,2026/12/31,['2021-2026 Sound Recordings Code MOA']
+48,2018-2020 Sound Recordings MOA,2018/01/01,2020/12/31,"['2002-2006 Sound Recordings Code', '2015-2017 Sound Recordings Code MOA']"
+49,2015-2017 Sound Recordings Code MOA,2015/01/01,2017/12/31,['2012-2014 Sound Recordings Code MOA']
+50,2010-2011 Sound Recordings Code Extension,2010/07/01,2011/12/31,['2007-2010 Sound Recordings Code MOA']
+51,2012 Music Video Supplement to Sound Recordings Code,2012/XX/XX,2014/12/31,['2012-2014 Sound Recordings Code MOA']
+52,2012-2014 Sound Recordings Code MOA,2012/01/01,2014/12/31,"['2007-2010 Sound Recordings Code MOA', '2010-2011 Sound Recordings Code Extension']"
+53,2007-2010 Sound Recordings Code MOA,2007/07/01,2010/06/30,['2002-2006 Sound Recordings Code']
+54,2006-2007 Sound Recordings Code Extension,2006/07/01,2007/06/30,['2002-2006 Sound Recordings Code']
+55,2002-2006 Sound Recordings Code,2002/07/01,2006/06/30,[]
+56,2023 Basic Cable Animation Agreement,2023/07/01,2026/06/30,"['2014 Television Animation Agreement', '2018 Basic Cable Animation Agreement', '2020 Basic Cable Animation Agreement']"
+57,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+58,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+59,2020 Television Animation Agreement,2020/07/01,2023/06/30,"['2014 Television Animation Agreement', '2018 Television Animation Agreement', '2020 Theatrical/Television MOA', '2017 Theatrical/Television MOA', '2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2018 Basic Cable Animation Agreement', '2020 Basic Cable Animation Agreement']"
+60,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+61,2020 Basic Cable Animation Agreement,2020/07/01,2023/06/30,"['2014 Television Animation Agreement', '2018 Basic Cable Animation Agreement']"
+62,2018 Basic Cable Animation Agreement,2018/11/20,2020/06/30,['2014 Television Animation Agreement']
+63,2014 SAG-AFTRA TV Agreement,2014/07/01,2017/06/30,['2014 SAG-AFTRA Basic Agreement']
+64,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA']"
+65,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+66,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+67,2014 SAG-AFTRA Basic Agreement,2014/XX/XX,,[]
+68,2014 SAG-AFTRA TV Agreement,2014/07/01,2017/06/30,['2014 SAG-AFTRA Basic Agreement']
+69,2014 Television Adherence Letter,2014/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+70,2024 MOA National Code of Fair Practice for Network TV Broadcasting,2024/07/01,,['2021 MOA National Code of Fair Practice for Network TV Broadcasting']
+71,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+72,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+73,2021 MOA National Code of Fair Practice for Network TV Broadcasting,2021/07/01,2024/06/30,['2018 MOA National Code of Fair Practice for Network TV Broadcasting']
+74,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+75,Memorandum of Agreement Theatrical-Television 2014,2014/07/01,2017/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+76,2014-2018 SAG-AFTRA Network Code,2014/11/16,2018/06/30,[]
+77,2018 MOA National Code of Fair Practice for Network TV Broadcasting,2018/07/01,2021/06/30,['2014-2018 SAG-AFTRA Network Code']
+78,2018-2022 National Public Television MOA,2018/07/21,2022/07/20,[]
+79,2014 SAG-AFTRA TV Agreement,2014/07/01,2017/06/30,['2014 SAG-AFTRA Basic Agreement']
+80,2023 Television Animation Agreement,2023/07/01,2026/06/30,"['2014 Television Animation Agreement', '2018 Television Animation Agreement', '2020 Television Animation Agreement', '2023 Theatrical/Television MOA', '2020 Theatrical/Television MOA', '2023 Basic Cable Animation Agreement']"
+81,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+82,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+84,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+85,2018 Television Animation Agreement,2018/11/20,2020/06/30,"['2014 Television Animation Agreement', '2017 SAG-AFTRA TV Agreement']"
+86,2014 Television Animation Agreement,2014/07/01,2017/06/30,"['2014 SAG-AFTRA TV Agreement', '2014 SAG-AFTRA Basic Agreement']"
+88,2024 MOA National Code of Fair Practice for Network TV Broadcasting,2024/07/01,,['2021 MOA National Code of Fair Practice for Network TV Broadcasting']
+89,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+90,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+91,2021 MOA National Code of Fair Practice for Network TV Broadcasting,2021/07/01,2024/06/30,['2018 MOA National Code of Fair Practice for Network TV Broadcasting']
+92,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+93,2014-2018 SAG-AFTRA Network Code,2014/11/16,2018/06/30,[]
+94,2018 MOA National Code of Fair Practice for Network TV Broadcasting,2018/07/01,2021/06/30,['2014-2018 SAG-AFTRA Network Code']
+95,2018-2022 National Public Television MOA,2018/07/21,2022/07/20,[]
+96,2014 SAG-AFTRA Basic Agreement,2014/XX/XX,,[]
+97,2014 SAG-AFTRA TV Agreement,2014/07/01,2017/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014-2018 SAG-AFTRA Network Code']"
+98,2020 SAG-AFTRA MOA 7-22-20,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA']"
+99,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+100,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+101,2014 SAG-AFTRA Basic Agreement,2014/07/01,2017/06/30,"['2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA', '2023 Theatrical/Television MOA']"
+102,2020 Theatrical Adherence Letter,2020/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+103,Low Budget Theatrical Agreement (LBA),2022/07/01,,['2014 SAG-AFTRA Basic Agreement']
+104,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+105,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+106,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+107,2014 SAG-AFTRA Basic Agreement,2014/07/01,,[]
+108,2020 Theatrical Adherence Letter,2020/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+109,Moderate Low Budget Project Agreement (MPA),2023/03/28,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+110,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA']"
+111,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+112,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+113,2014 SAG-AFTRA Basic Agreement,2014/07/01,,[]
+114,2020 Indie Adherence Letter Non-episodic,2020/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+115,Ultra Low Budget Project Agreement (UPA),2022/07/01,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', 'Moderate Low Budget Project Agreement (MPA)']"
+116,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA']"
+117,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+118,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+119,2014 SAG-AFTRA Basic Agreement,2014/07/01,,"['Low Budget Theatrical Agreement (LBA)', 'Moderate Low Budget Project Agreement (MPA)', 'Ultra Low Budget Project Agreement (UPA)', 'Short Project Agreement (SPA)', 'Student Film Agreement', 'Micro-Budget Project Agreement']"
+120,2020 Indie Adherence Letter Non-episodic,2020/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+121,Short Project Agreement (SPA),2022/07/01,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+122,Student Film Agreement,XXXX/XX/XX,,['2014 SAG-AFTRA Basic Agreement']
+123,Micro-Budget Project Agreement,2020/12/XX,,"['Short Project Agreement (SPA)', 'Ultra Low Budget Project Agreement (UPA)', 'Student Film Agreement']"
+124,2017 New Media Agreement for Dramatic Programs (Deferrable),2017/XX/XX,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+125,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+126,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 SAG-AFTRA MOA 7-22-20']"
+127,Moderate Low Budget Project Agreement (MPA),2023/03/28,,['2014 SAG-AFTRA Basic Agreement']
+128,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+129,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+130,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+131,2014 SAG-AFTRA Basic Agreement,2014/XX/XX,,[]
+132,2020 Indie Adherence Letter Non-episodic,2020/09/21,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 SAG-AFTRA MOA 7-22-20', 'JPC & SAG-AFTRA Covid Modifications']"
+133,Ultra Low Budget Project Agreement (UPA),2022/07/01,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+134,2020 Theatrical/Television MOA,2020/07/01,2023/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+135,2023 Theatrical/Television MOA,2023/11/09,2026/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+136,2017 Theatrical/Television MOA,2017/07/01,2020/06/30,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+137,2014 SAG-AFTRA Basic Agreement,2014/07/01,,[]
+138,2020 Indie Adherence Letter Non-episodic,2020/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA']"
+139,Short Project Agreement (SPA),2022/XX/XX,,"['2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement']"
+140,Micro-Budget Project Agreement,2020/12/XX,,"['2014 SAG-AFTRA Basic Agreement', '2020 Theatrical/Television MOA', '2014 SAG-AFTRA TV Agreement', 'Short Project Agreement (SPA)', 'Ultra Low Budget Project Agreement (UPA)', 'Student Film Agreement', '2017 New Media Agreement for Dramatic Programs (Deferrable)']"

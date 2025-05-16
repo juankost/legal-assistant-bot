@@ -85,7 +85,9 @@ def add_agreement_id_to_metadata(agreements_csv_path):
 
     if "agreement_id" not in data.columns:
         print("Adding agreement_id column to metadata")
+        columns = data.columns.tolist()
         data["agreement_id"] = range(len(data))
+        data = data[["agreement_id", *columns]]
         data.to_csv(agreements_csv_path, index=False)
         print(f"Updated {agreements_csv_path} with agreement_id column")
     else:
@@ -152,9 +154,9 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
 
         print(f"Processing agreement {agreement_id}: {row['agreement_title']}")
 
-        # Read the markdown content (first 10k characters only)
+        # Read the markdown content (first 100k characters only)
         with open(markdown_path, "r") as f:
-            agreement_text = f.read(10000)
+            agreement_text = f.read(100000)
 
         # Get all agreement titles for reference
         all_agreements_titles = data["agreement_title"].dropna().tolist()
@@ -181,7 +183,8 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
 
         analysis = call_gemini(
             prompt=prompt,
-            model_name="gemini-2.5-pro-preview-03-25",
+            # model_name="gemini-2.5-pro-preview-03-25",
+            model_name="gemini-2.5-flash-preview-04-17",
             response_schema=response_schema,
         )
 
@@ -227,7 +230,7 @@ if __name__ == "__main__":
     output_dir = os.path.join(DATA_DIR, "markdown")
 
     # Add agreement_id to the metadata if needed
-    add_agreement_id_to_metadata(agreements_path)
+    # add_agreement_id_to_metadata(agreements_path)
 
     # Process agreements
     # process_agreement_pdfs(agreements_path, output_dir)

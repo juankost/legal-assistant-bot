@@ -31,19 +31,22 @@ these (implicit) links and add them to the Graph that is built by HippoRAG 2.
 
 **Phase 1: Basic RAG over the SAG-AFTRA agreements**
 
+Guiding principle: I am not looking for perfection, just a minimal code that does the whole workflow.
+Afterward I can iterate on pieces of the code to fix mistakes and improve the performance.
+
 1.  **Website Scraping & Metadata Extraction:**
 
     - [x] (1 day) Create a metadata.csv file with the following columns: Category, Subcategory, URL, Title, Text, Valid From, Valid To. Save the metadata.csv file in the data/raw folder.
     - [x] (1 day) Download the PDFs and save them in the data/raw folder. Add the path to each file to the metadata.csv file
     - [x] (1 day) Test using browser-use library to scrape the data --> It sucks so FAR!
-    - (2 days) Use an LLM to infer the validity period of the agreement based on the text of the agreement.
-    - (2 days) Infer the links between the different agreements (which agreement is successor of which other agreement)
+    - [x] (1 day) Use an LLM to infer the validity period of the agreement based on the text of the agreement.
+    - [x] (1 day) Infer the links between the different agreements (which agreement is successor of which other agreement)
 
 2.  **PDF Conversion & Chunking:**
 
     - [x] (1 days) Create pipelin to convert the PDFs to Markdown using Mistral OCR and saving to new forlder, update the metadata.csv file with the processed file path.
-    - (1 week) Option 1 : - Use Mistral OCR to convert the PDFs to Markdown. - Chunk the Markdown by length - Initialize a HippoRAG 2 graph with the chunks - Store the graph in a Qdrant collection
-    - (1 week) Option 2 : - Explore how can I parse and chunk the files using Docling+Gemini - Target: I would like to be able to chunk based on semantically meaningful units, e.g. articles, sections, paragraphs, etc. - Initialize a HippoRAG 2 graph with the chunks - Store the graph in a Qdrant collection
+    - [ ] (1 week) Option 1 : - Use Mistral OCR to convert the PDFs to Markdown. - Chunk the Markdown by length - Initialize a HippoRAG 2 graph with the chunks - Store the graph in a Qdrant collection
+    - [ ] (1 week) Option 2 : - Explore how can I parse and chunk the files using Docling+Gemini - Target: I would like to be able to chunk based on semantically meaningful units, e.g. articles, sections, paragraphs, etc. - Initialize a HippoRAG 2 graph with the chunks - Store the graph in a Qdrant collection
 
 3.  **Creation of the RAG chatbot:**
 
