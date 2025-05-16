@@ -1,0 +1,3 @@
+[submodule "3rdparty/HippoRAG"]
+	path = 3rdparty/HippoRAG
+	url = https://github.com/OSU-NLP-Group/HippoRAG.git
