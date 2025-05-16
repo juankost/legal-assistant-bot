@@ -66,6 +66,87 @@ Rongfei Lu
 Target markets:
 Legal texts that do not yet have the preprocessing done (i.e. linking different articles, ...)
 
+# Installation
+
+This project uses Conda for managing dependencies.
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone <repository-url>
+    cd legal-assistant-bot
+    ```
+
+2.  **Create and activate Conda environment:**
+
+    ```bash
+    conda env create -f environment.yml  # Assuming you'll create an environment.yml
+    conda activate legal-assistant-env # Or your chosen environment name
+    ```
+
+    Alternatively, if you prefer to manage packages manually or from `requirements.txt`:
+
+    ```bash
+    conda create -n legal-assistant-env python=3.9 # Or your desired Python version
+    conda activate legal-assistant-env
+    pip install -r requirements.txt
+    ```
+
+    _Note: It's recommended to create an `environment.yml` file for more reproducible Conda environments. You can create one using `conda env export > environment.yml` once your environment is set up._
+
+3.  **Initialize and update the submodule:**
+
+    ```bash
+    git submodule init
+    git submodule update
+    ```
+
+4.  **Set up any necessary API keys or configurations:**
+    (Add details here if your application requires API keys, e.g., for OpenAI, or other configurations. You might use a `.env` file for this.)
+
+# Repository Structure
+
+The repository is organized as follows:
+
+```
+legal-assistant-bot/
+├── .git/                      # Git version control files
+├── .gitignore                 # Specifies intentionally untracked files that Git should ignore
+├── .cursor/                   # Cursor IDE specific files
+├── README.md                  # This file: Overview, setup, and usage instructions
+├── requirements.txt           # Python package dependencies (for pip)
+├── environment.yml            # (Recommended) Conda environment specification
+├── 3rdparty/                  # Third-party libraries and submodules
+│   └── HippoRAG/              # HippoRAG submodule
+├── data/                      # All data files
+│   ├── raw/                   # Original, unmodified data
+│   ├── markdown/              # Data converted to Markdown format
+│   ├── logs/                  # Log files from application runs
+│   ├── mturk/                 # Data related to Amazon Mechanical Turk tasks
+│   │   ├── input/             # Input files for MTurk HITs
+│   │   └── output/            # Raw output/results from MTurk
+│   └── processed/             # Processed or validated data ready for use
+├── deprecated/                # Older files and versions no longer in active use
+├── docs/                      # Documentation files
+│   ├── prd/                   # Product Requirement Documents
+│   │   └── mech-turk-data-validation.md # PRD for Mechanical Turk data validation
+│   └── progress/              # Progress tracking documents
+│       └── work-progress.md   # Document tracking overall work progress
+├── notebooks/                 # Jupyter notebooks for experimentation and analysis
+├── scripts/                   # Utility scripts (e.g., for deployment, data conversion)
+├── src/                       # Source code for the project
+│   ├── chatbot/               # Core logic for the RAG chatbot
+│   ├── knowledge_graph/       # Code related to building and using the knowledge graph (e.g., HippoRAG adaptation)
+│   ├── mechanical_turk/       # Modules for interacting with Mechanical Turk (e.g. API, HIT creation, results processing)
+│   ├── preprocessing/         # Scripts and modules for data preprocessing
+│   ├── scraper/               # Code for scraping data from various sources
+│   └── utils.py               # Common utility functions and classes
+└── tests/                     # Automated tests
+    ├── test_chatbot/          # Tests for the chatbot module
+    ├── test_preprocessing/    # Tests for the preprocessing module
+    └── ...                    # Other module-specific tests
+```
+
 | Title                                                                                                            | Text                                                                                                                                                       | Valid From | Valid To |
 | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
 | 2022 Corporate Educational and Non-Broadcast Contract Ebook                                                      | Informational / Guide PDF                                                                                                                                  | 2022       |          |

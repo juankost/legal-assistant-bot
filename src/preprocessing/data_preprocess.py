@@ -5,7 +5,7 @@ import logging
 from mistralai import Mistral
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils import retry_on_error  # noqa: E402
+from src.utils import retry_on_error  # noqa: E402
 from scraper.llm_scraper import call_gemini  # noqa: E402
 from preprocessing.prompts import AGREEMENT_VALIDITY_PROMPT  # noqa: E402
 
