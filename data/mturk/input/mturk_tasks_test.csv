@@ -1,0 +1,6 @@
+radioName,agreement_id,agreement_title,agreement_text_url,system_validity_from,system_valid_to,system_impacted_agreements_string
+validation,136,2017 Theatrical/Television MOA,https://www.sagaftra.org/sites/default/files/2017_sag-aftra_theatrical-television_moa_7.pdf,2017/07/01,2020/06/30,"'2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement'"
+validation,137,2014 SAG-AFTRA Basic Agreement,https://www.sagaftra.org/sites/default/files/2014_sag-aftra_cba_1.pdf,2014/XX/XX,,'2014 SAG-AFTRA TV Agreement'
+validation,138,2020 Indie Adherence Letter Non-episodic,https://www.sagaftra.org/sites/default/files/IndieAdherenceLetterNon-Episodic-12.1.20Sample.pdf,2020/XX/XX,,"'2014 SAG-AFTRA Basic Agreement', '2017 Theatrical/Television MOA', '2020 Theatrical/Television MOA'"
+validation,139,Short Project Agreement (SPA),https://www.sagaftra.org/sites/default/files/Short%20Project%20Agreement%20%28SPA%29%20Rev.%202.21.23%20SAMPLE.pdf,2022/07/01,,"'2014 SAG-AFTRA Basic Agreement', '2014 SAG-AFTRA TV Agreement', 'Moderate Low Budget Project Agreement (MPA)', '2017 New Media Agreement for Dramatic Programs (Deferrable)'"
+validation,140,Micro-Budget Project Agreement,https://www.sagaftra.org/sites/default/files/2020_Micro-Budget_Project_%20AgreementWatermark.pdf,2020/12/XX,,

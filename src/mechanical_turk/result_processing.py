@@ -12,9 +12,10 @@ from collections import Counter
 # This is needed to fetch the original 'system_' values shown to the worker.
 # Example: 'data/mturk/input/mturk_tasks.csv'
 
-ANNOTATION_FILE_PATH = "data/processed/annotations.csv"
-MTURK_OUTPUT_RAW_CSV_PATH = "data/mturk/output/mturk_results_raw.csv"
-MTURK_INPUT_PROCESSED_PATH = "data/mturk/input/mturk_tasks.csv"
+DATA_DIR = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data"
+ANNOTATION_FILE_PATH = os.path.join(DATA_DIR, "agreement_validity.csv")
+MTURK_OUTPUT_RAW_CSV_PATH = os.path.join(DATA_DIR, "mturk", "output", "mturk_results_raw.csv")
+MTURK_INPUT_PROCESSED_PATH = os.path.join(DATA_DIR, "mturk", "input", "mturk_tasks.csv")
 
 
 def validate_date_format(date_str):

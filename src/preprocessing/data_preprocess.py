@@ -113,9 +113,7 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
     data = add_agreement_id_to_metadata(agreements_csv_path)
 
     # Define output path for results
-    output_path = os.path.join(
-        os.path.dirname(agreements_csv_path), "agreement_validity_analysis.csv"
-    )
+    output_path = os.path.join(os.path.dirname(agreements_csv_path), "agreement_validity.csv")
 
     # Load existing results if file exists
     if os.path.exists(output_path):
@@ -135,7 +133,7 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
         processed_ids = set()
         print("Starting new analysis file")
 
-    for _, row in data.iterrows():
+    for _, row in tqdm.tqdm(data.iterrows(), total=len(data)):
         agreement_id = row["agreement_id"]
 
         # Skip if already processed and overwrite is False
@@ -195,8 +193,8 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
             result = {
                 "agreement_id": agreement_id,
                 "agreement_title": row["agreement_title"],
-                "validity_from": analysis.get("validity_from", ""),
-                "valid_to": analysis.get("valid_to", ""),
+                "validity_from": analysis.get("validity_from", "Not specified"),
+                "valid_to": analysis.get("valid_to", "Not specified"),
                 "impacted_agreements": analysis.get("impacted_agreements", []),
             }
 
@@ -304,5 +302,5 @@ if __name__ == "__main__":
 
     # Process agreements
     # process_agreement_pdfs(agreements_path, output_dir)
-    # get_agreements_validity_period(agreements_path, overwrite=False)
+    get_agreements_validity_period(agreements_path, overwrite=False)
     # get_agreements_summary(agreements_path)

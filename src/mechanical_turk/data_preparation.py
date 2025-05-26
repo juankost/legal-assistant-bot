@@ -13,7 +13,7 @@ import tqdm
 
 ROOT_PATH = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot"
 METADATA_PATH = os.path.join(ROOT_PATH, "data", "agreement_metadata.csv")
-VALIDITY_ANALYSIS_PATH = os.path.join(ROOT_PATH, "data", "agreement_validity_analysis.csv")
+VALIDITY_ANALYSIS_PATH = os.path.join(ROOT_PATH, "data", "agreement_validity.csv")
 MTURK_DATA_PATH = os.path.join(ROOT_PATH, "data", "mturk", "input")
 MTURK_TASKS_CSV_PATH = os.path.join(MTURK_DATA_PATH, "mturk_tasks.csv")
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     )
 
     MTURK_TASKS_CSV_PATH = os.path.join(MTURK_DATA_PATH, "mturk_tasks.csv")
-    mturk_tasks_text_csv_path = os.path.join(MTURK_DATA_PATH, "mturk_tasks_text.csv")
+    mturk_tasks_text_csv_path = os.path.join(MTURK_DATA_PATH, "mturk_tasks_test.csv")
 
-    df = pd.read_csv(MTURK_TASKS_CSV_PATH).head(5)
+    df = pd.read_csv(MTURK_TASKS_CSV_PATH).tail(5)
     df.to_csv(mturk_tasks_text_csv_path, index=False)
