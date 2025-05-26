@@ -7,10 +7,13 @@ import hashlib
 import pandas as pd
 from tqdm import tqdm
 from typing import List, Dict, Any
+from thefuzz import process
+import ast
 
 ROOT_DIR = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot"
 METADATA_PATH = os.path.join(ROOT_DIR, "data", "agreement_metadata.csv")
 CHUNKS_DIR = os.path.join(ROOT_DIR, "data", "chunks")
+ANNOTATION_FILE_PATH = os.path.join(ROOT_DIR, "data", "agreement_validity.csv")
 
 
 def length_based_chunking(text: str, config: Dict[str, Any]) -> List[Dict[str, str]]:
@@ -119,17 +122,79 @@ def create_chunk_hash(chunk_text):
     return hashlib.md5(chunk_text.encode("utf-8")).hexdigest()
 
 
+def get_summaries_of_impacted_agreements(impacted_agreements_list, agreement_title_summary_dict):
+
+    enriched_impacted_agreements_list = []
+
+    # Handle various formats of impacted_agreements_list
+    if pd.isna(impacted_agreements_list):
+        actual_agreements_list = []
+    elif isinstance(impacted_agreements_list, str):
+        if impacted_agreements_list.startswith("[") and impacted_agreements_list.endswith("]"):
+            try:
+                actual_agreements_list = ast.literal_eval(impacted_agreements_list)
+            except (ValueError, SyntaxError):
+                actual_agreements_list = [
+                    s.strip() for s in impacted_agreements_list.strip("[]").split(",") if s.strip()
+                ]  # Fallback for malformed lists
+        else:
+            actual_agreements_list = [
+                s.strip() for s in impacted_agreements_list.split(",") if s.strip()
+            ]
+    elif isinstance(impacted_agreements_list, list):
+        actual_agreements_list = impacted_agreements_list
+    else:
+        actual_agreements_list = []
+
+    available_titles = list(agreement_title_summary_dict.keys())
+
+    for agreement_title in actual_agreements_list:
+        summary = None
+        if agreement_title in agreement_title_summary_dict:
+            summary = agreement_title_summary_dict[agreement_title]
+        elif available_titles:  # Only attempt fuzzy match if there are titles to match against
+            # Fuzzy match
+            best_match = process.extractOne(agreement_title, available_titles)
+            if best_match and best_match[1] >= 80:
+                summary = agreement_title_summary_dict[best_match[0]]
+
+        if summary:
+            enriched_impacted_agreements_list.append(
+                {
+                    "impacted_agreement_title": agreement_title,
+                    "impacted_agreement_summary": summary,
+                }
+            )
+    return enriched_impacted_agreements_list
+
+
 def process_markdown_files():
     """
     Process all markdown files according to the implementation plan.
     """
     os.makedirs(CHUNKS_DIR, exist_ok=True)
     metadata_df = pd.read_csv(METADATA_PATH)
+
+    # Add the validity information and impacted agreements to the metadata
+    annotation_df = pd.read_csv(ANNOTATION_FILE_PATH)
+    annotation_df = annotation_df[
+        ["agreement_id", "mturk_valid_from", "mturk_valid_to", "mturk_impacted_agreements"]
+    ]
+    metadata_df = pd.merge(metadata_df, annotation_df, on="agreement_id", how="left")
+
+    # Create a direct mapping from agreement_title to summary
+    agreement_title_summary_dict = pd.Series(
+        metadata_df.summary.values, index=metadata_df.agreement_title
+    ).to_dict()
+
     chunking_config = {
         "chunk_size": 300,  # tokens
         "chunk_overlap": 100,  # tokens
         "chars_per_token": 3.6,  # approximation for average characters per token
     }
+
+    # Convert NaN strings to None
+    metadata_df = metadata_df.fillna(value="")
 
     for _, row in tqdm(
         metadata_df.iterrows(), total=len(metadata_df), desc="Processing markdown files"
@@ -144,6 +209,11 @@ def process_markdown_files():
             chunk_text = chunk_dict["chunk_text"]
             chunk_hash = create_chunk_hash(chunk_text)
 
+            # Ensure mturk_impacted_agreements is passed correctly
+            impacted_agreements_input = row["mturk_impacted_agreements"]
+            enriched_impacted_agreements_list = get_summaries_of_impacted_agreements(
+                impacted_agreements_input, agreement_title_summary_dict
+            )
             chunk_data = {
                 "agreement_id": agreement_id,
                 "agreement_title": row["agreement_title"],
@@ -157,6 +227,9 @@ def process_markdown_files():
                 "chunk_text": chunk_text,
                 "previous_context": chunk_dict["previous_context"],
                 "following_context": chunk_dict["following_context"],
+                "valid_from": row["mturk_valid_from"],
+                "valid_to": row["mturk_valid_to"],
+                "impacted_agreements": enriched_impacted_agreements_list,
                 "chunk_hash": chunk_hash,
                 "total_chunks": len(chunks),
             }
