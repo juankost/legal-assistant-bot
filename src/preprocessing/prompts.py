@@ -45,3 +45,14 @@ Provide your analysis in a structured JSON format as follows:
   "impacted_agreements": ["Full Agreement Title 1", "Full Agreement Title 2"]
 }}
 """
+
+AGREEMENT_SUMMARY_PROMPT = """\
+You are a helpful assistant that summarizes legal agreements.
+Analyze the following agreement text and provide a summary highlighting the main purpose and scope of the agreement.
+
+Agreement Title: {title}
+Agreement Text (first 10000 characters):
+{text}
+
+Summary:
+"""

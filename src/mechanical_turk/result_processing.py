@@ -1,19 +1,20 @@
 import csv
-import json
 import pandas as pd
 import os
 from collections import Counter
 
 # Assumptions:
 # ANNOTATION_FILE_PATH: Path to the main annotation CSV file that needs to be updated.
-# Example: 'data/processed/annotations.csv' (consistent with PRD naming and README structure)
-# MTURK_OUTPUT_CSV_PATH: Path to the CSV file downloaded from MTurk containing worker responses.
-# Example: 'data/mturk/output/mturk_results.csv'
+# Example: 'data/processed/annotations.csv'
+# MTURK_OUTPUT_RAW_CSV_PATH: Path to the CSV file downloaded from MTurk containing worker responses.
+# Example: 'data/mturk/output/mturk_results_raw.csv'
+# MTURK_INPUT_PROCESSED_PATH: Path to the CSV file that was uploaded to MTurk (output of data_preparation.py).
+# This is needed to fetch the original 'system_' values shown to the worker.
+# Example: 'data/mturk/input/mturk_tasks.csv'
 
-ANNOTATION_FILE_PATH = "data/processed/annotations.csv"  # Placeholder
-MTURK_OUTPUT_RAW_CSV_PATH = (
-    "data/mturk/output/mturk_results_raw.csv"  # Placeholder for raw MTurk output
-)
+ANNOTATION_FILE_PATH = "data/processed/annotations.csv"
+MTURK_OUTPUT_RAW_CSV_PATH = "data/mturk/output/mturk_results_raw.csv"
+MTURK_INPUT_PROCESSED_PATH = "data/mturk/input/mturk_tasks.csv"
 
 
 def validate_date_format(date_str):
@@ -35,24 +36,35 @@ def validate_date_format(date_str):
     return False
 
 
-def validate_impacted_agreements_json(json_str):
-    """Validates if the string is a JSON list of objects with specific keys."""
-    if not isinstance(json_str, str):
-        return False  # Must be a string to be valid JSON text
-    try:
-        data = json.loads(json_str)
-        if not isinstance(data, list):
-            return False
-        for item in data:
-            if (
-                not isinstance(item, dict)
-                or "impacted_agreement_title" not in item
-                or "justification" not in item
-            ):
-                return False
-        return True
-    except json.JSONDecodeError:
+def validate_comma_separated_quoted_strings(value_str):
+    """
+    Validates if the string is a comma-separated list of double-quoted strings,
+    or an empty string "".
+    Examples: "Title A", "Title B, with comma"
+                ""
+                "Single Title"
+    Allows for escaped quotes inside the titles.
+    """
+    if not isinstance(value_str, str):
         return False
+    if value_str == '""':  # Empty string for no agreements
+        return True
+    if not value_str:  # Truly empty string is invalid, must be ""
+        return False
+
+    # Let's use a simpler check that it's not obviously wrong, rather than a complex regex.
+    # The PRD emphasizes clear instructions and examples for the worker.
+    # We'll check if it's an empty string for "no agreements" or seems to be quoted.
+    if value_str == '""':
+        return True
+    # Check if it starts and ends with a quote, and is not just a single quote or similar error
+    if value_str.startswith('"') and value_str.endswith('"') and len(value_str) >= 2:
+        # This is a basic check. Further parsing could be done if strict validation is critical.
+        # For example, ensuring that internal quotes are properly escaped or that commas
+        # only appear between correctly quoted segments.
+        # Given MTurk context, this might be sufficient if combined with clear instructions.
+        return True
+    return False
 
 
 def get_consensus_value(series):
@@ -80,7 +92,8 @@ def get_consensus_value(series):
 def process_mturk_results(
     mturk_results_csv_path,
     annotations_csv_path,
-    original_llm_data_path,  # Path to the data sent to MTurk, to retrieve original LLM values if needed
+    # Path to the data sent to MTurk, to retrieve original system values
+    original_system_data_path,
 ):
     """
     Processes results from MTurk, performs validation, consolidation,
@@ -92,7 +105,7 @@ def process_mturk_results(
         print(f"Error: MTurk results file not found at {mturk_results_csv_path}.")
         print("Please ensure the path is correct or create a dummy file for testing.")
         print(
-            "Expected columns (example): agreement_id, human_validity_from_is_correct, human_validity_from_corrected, ..."
+            "Expected columns (example): agreement_id, human_validity_from_is_correct, human_validity_from_corrected, human_impacted_agreements_corrected_string, ..."
         )
         return
 
@@ -101,40 +114,50 @@ def process_mturk_results(
         return
 
     try:
-        df_original_llm_data = pd.read_csv(
-            original_llm_data_path,
+        df_original_system_data = pd.read_csv(
+            original_system_data_path,
             usecols=[
                 "agreement_id",
-                "llm_validity_from",
-                "llm_valid_to",
-                "llm_impacted_agreements_justified_json",
+                "system_validity_from",  # Name as in mturk_tasks.csv
+                "system_valid_to",  # Name as in mturk_tasks.csv
+                "system_impacted_agreements_string",  # Name as in mturk_tasks.csv
             ],
         )
-        df_original_llm_data.rename(
+        # Rename for clarity when merging, to distinguish from human-corrected columns
+        df_original_system_data.rename(
             columns={
-                "llm_impacted_agreements_justified_json": "original_llm_impacted_agreements_justified_json"
+                "system_validity_from": "system_validity_from_original",
+                "system_valid_to": "system_valid_to_original",
+                "system_impacted_agreements_string": "system_impacted_agreements_string_original",
             },
             inplace=True,
         )
     except FileNotFoundError:
-        print(f"Error: Original LLM data (MTurk input) file not found at {original_llm_data_path}.")
-        print("This file is needed to retrieve original LLM values. Ensure path is correct.")
+        print(
+            f"Error: Original system data (MTurk input) file not found at {original_system_data_path}."
+        )
+        print("This file is needed to retrieve original system values. Ensure path is correct.")
         return
     except KeyError as e:
-        print(f"Error: Missing expected column in {original_llm_data_path}: {e}")
+        print(f"Error: Missing expected column in {original_system_data_path}: {e}")
+        print(
+            "Expected columns: agreement_id, system_validity_from, system_valid_to, system_impacted_agreements_string"
+        )
         return
 
     processed_rows = []
+    # Updated required columns from MTurk output based on hit_design.md and PRD 4.2.D
     required_mturk_cols = [
         "agreement_id",
         "human_validity_from_is_correct",
-        "human_validity_from_corrected",
-        "human_validity_from_correction_justification",
+        "human_validity_from_corrected",  # Still collected
+        # "human_validity_from_correction_justification", # Removed
         "human_valid_to_is_correct",
-        "human_valid_to_corrected",
-        "human_valid_to_correction_justification",
+        "human_valid_to_corrected",  # Still collected
+        # "human_valid_to_correction_justification", # Removed
         "human_impacted_agreements_is_correct",
-        "human_impacted_agreements_corrected_justified_json",
+        # "human_impacted_agreements_corrected_justified_json", # Removed
+        "human_impacted_agreements_corrected_string",  # New field
         "annotation_notes",
     ]
     for col in required_mturk_cols:
@@ -178,55 +201,79 @@ def process_mturk_results(
             elif pd.api.types.is_numeric_dtype(group[field_is_correct]):
                 consolidated[field_is_correct] = group[field_is_correct].astype(bool)
             else:  # Already boolean or some other type we hope Counter can handle
-                consolidated[field_is_correct] = group[field_is_correct]
+                # Fallback for unexpected types: try converting to string then to bool
+                current_series_str = group[field_is_correct].astype(str).str.lower()
+                bool_map = {
+                    "true": True,
+                    "false": False,
+                    "yes": True,
+                    "no": False,
+                    "1": True,
+                    "0": False,
+                    "1.0": True,
+                    "0.0": False,
+                }
+                current_series_bool = current_series_str.map(bool_map)
+                consolidated[field_is_correct] = current_series_bool
+
             consolidated[field_is_correct] = get_consensus_value(consolidated[field_is_correct])
 
         if consolidated["human_validity_from_is_correct"] is False:
             vf_corrected_series = group["human_validity_from_corrected"].dropna()
             consolidated["human_validity_from_corrected"] = get_consensus_value(vf_corrected_series)
-            if not validate_date_format(consolidated["human_validity_from_corrected"]):
+            if pd.notna(consolidated["human_validity_from_corrected"]) and not validate_date_format(
+                consolidated["human_validity_from_corrected"]
+            ):
                 print(
                     f"Warning (AGR_ID: {agreement_id}): Invalid date format for human_validity_from_corrected: {consolidated['human_validity_from_corrected']}. Will use NA."
                 )
                 consolidated["human_validity_from_corrected"] = pd.NA
-            consolidated["human_validity_from_correction_justification"] = get_consensus_value(
-                group["human_validity_from_correction_justification"].dropna()
-            )
+            # Justification removed
+            # consolidated["human_validity_from_correction_justification"] = get_consensus_value(
+            #     group["human_validity_from_correction_justification"].dropna()
+            # )
         else:
             consolidated["human_validity_from_corrected"] = pd.NA
-            consolidated["human_validity_from_correction_justification"] = pd.NA
+            # consolidated["human_validity_from_correction_justification"] = pd.NA # Removed
 
         if consolidated["human_valid_to_is_correct"] is False:
             vt_corrected_series = group["human_valid_to_corrected"].dropna()
             consolidated["human_valid_to_corrected"] = get_consensus_value(vt_corrected_series)
-            if not validate_date_format(consolidated["human_valid_to_corrected"]):
+            if pd.notna(consolidated["human_valid_to_corrected"]) and not validate_date_format(
+                consolidated["human_valid_to_corrected"]
+            ):
                 print(
                     f"Warning (AGR_ID: {agreement_id}): Invalid date format for human_valid_to_corrected: {consolidated['human_valid_to_corrected']}. Will use NA."
                 )
                 consolidated["human_valid_to_corrected"] = pd.NA
-            consolidated["human_valid_to_correction_justification"] = get_consensus_value(
-                group["human_valid_to_correction_justification"].dropna()
-            )
+            # Justification removed
+            # consolidated["human_valid_to_correction_justification"] = get_consensus_value(
+            #     group["human_valid_to_correction_justification"].dropna()
+            # )
         else:
             consolidated["human_valid_to_corrected"] = pd.NA
-            consolidated["human_valid_to_correction_justification"] = pd.NA
+            # consolidated["human_valid_to_correction_justification"] = pd.NA # Removed
 
         if consolidated["human_impacted_agreements_is_correct"] is False:
+            # Changed from _corrected_justified_json to _corrected_string
             ia_corrected_series = group[
-                "human_impacted_agreements_corrected_justified_json"
+                "human_impacted_agreements_corrected_string"  # Changed
             ].dropna()
-            consolidated["human_impacted_agreements_corrected_justified_json"] = (
+            consolidated["human_impacted_agreements_corrected_string"] = (  # Changed
                 get_consensus_value(ia_corrected_series)
             )
-            if not validate_impacted_agreements_json(
-                consolidated["human_impacted_agreements_corrected_justified_json"]
+            if pd.notna(
+                consolidated["human_impacted_agreements_corrected_string"]
+            ) and not validate_comma_separated_quoted_strings(  # New validation function
+                consolidated["human_impacted_agreements_corrected_string"]  # Changed
             ):
                 print(
-                    f"Warning (AGR_ID: {agreement_id}): Invalid JSON for human_impacted_agreements_corrected_justified_json. Will use empty list."
+                    f"Warning (AGR_ID: {agreement_id}): Invalid format for human_impacted_agreements_corrected_string: {consolidated['human_impacted_agreements_corrected_string']}. Will use empty string."
                 )
-                consolidated["human_impacted_agreements_corrected_justified_json"] = "[]"
+                consolidated["human_impacted_agreements_corrected_string"] = '""'  # Changed
         else:
-            consolidated["human_impacted_agreements_corrected_justified_json"] = pd.NA
+            # If correct, no corrected string is expected. Store NA or empty string as appropriate.
+            consolidated["human_impacted_agreements_corrected_string"] = pd.NA  # Changed
 
         notes_series = group["annotation_notes"].dropna()
         consolidated["annotation_notes"] = (
@@ -240,66 +287,54 @@ def process_mturk_results(
         return
 
     df_processed_mturk = pd.DataFrame(processed_rows)
-    df_final = pd.merge(df_original_llm_data, df_processed_mturk, on="agreement_id", how="right")
+    # Merge with original system data to bring in system_..._original columns
+    df_final = pd.merge(df_original_system_data, df_processed_mturk, on="agreement_id", how="right")
 
-    df_final.rename(
-        columns={
-            "human_validity_from_correction_justification": "human_vf_correction_justification",
-            "human_valid_to_correction_justification": "human_vt_correction_justification",
-        },
-        inplace=True,
-    )
+    # Rename for final output columns in annotations.csv - justifications are removed
+    # df_final.rename(
+    #     columns={
+    #         "human_validity_from_correction_justification": "human_vf_correction_justification",
+    #         "human_valid_to_correction_justification": "human_vt_correction_justification",
+    #     },
+    #     inplace=True,
+    # )
 
-    def extract_titles(json_str):
-        if pd.isna(json_str) or not isinstance(json_str, str) or not json_str:
-            return pd.NA
-        try:
-            items = json.loads(json_str)
-            if not isinstance(items, list):
-                return pd.NA  # Expect a list
-            return json.dumps(
-                [
-                    item.get("impacted_agreement_title")
-                    for item in items
-                    if isinstance(item, dict) and "impacted_agreement_title" in item
-                ]
-            )
-        except (json.JSONDecodeError, TypeError):
-            return pd.NA
-
-    df_final["human_ia_corrected_justifications_json"] = df_final.apply(
-        lambda row: (
-            row["human_impacted_agreements_corrected_justified_json"]
-            if row["human_impacted_agreements_is_correct"] is False
-            else pd.NA
-        ),
-        axis=1,
-    )
-    df_final["human_impacted_agreements_corrected"] = df_final.apply(
-        lambda row: (
-            extract_titles(row["human_impacted_agreements_corrected_justified_json"])
-            if row["human_impacted_agreements_is_correct"] is False
-            else pd.NA
-        ),
-        axis=1,
-    )
+    # Impacted agreements: human_impacted_agreements_corrected_string is already the final format.
+    # No need for extract_titles or human_ia_corrected_justifications_json.
+    # df_final["human_ia_corrected_justifications_json"] = df_final.apply(
+    #     lambda row: (
+    #         row["human_impacted_agreements_corrected_justified_json"]
+    #         if row["human_impacted_agreements_is_correct"] is False
+    #         else pd.NA
+    #     ),
+    #     axis=1,
+    # )
+    # df_final["human_impacted_agreements_corrected"] = df_final.apply(
+    #     lambda row: (
+    #         extract_titles(row["human_impacted_agreements_corrected_justified_json"])
+    #         if row["human_impacted_agreements_is_correct"] is False
+    #         else pd.NA
+    #     ),
+    #     axis=1,
+    # )
 
     df_final["last_annotated_timestamp"] = pd.Timestamp.now()
 
+    # Updated final annotation columns based on PRD and hit_design.md
     final_annotation_columns = [
         "agreement_id",
-        "llm_validity_from",
-        "llm_valid_to",
-        "original_llm_impacted_agreements_justified_json",
+        "system_validity_from_original",  # Added: Original value shown to worker
+        "system_valid_to_original",  # Added: Original value shown to worker
+        "system_impacted_agreements_string_original",  # Added: Original value shown to worker
         "human_validity_from_is_correct",
         "human_validity_from_corrected",
-        "human_vf_correction_justification",
+        # "human_vf_correction_justification", # Removed
         "human_valid_to_is_correct",
         "human_valid_to_corrected",
-        "human_vt_correction_justification",
+        # "human_vt_correction_justification", # Removed
         "human_impacted_agreements_is_correct",
-        "human_impacted_agreements_corrected",
-        "human_ia_corrected_justifications_json",
+        "human_impacted_agreements_corrected_string",  # Changed from human_impacted_agreements_corrected
+        # "human_ia_corrected_justifications_json", # Removed
         "annotation_notes",
         "last_annotated_timestamp",
     ]
@@ -344,80 +379,65 @@ if __name__ == "__main__":
     os.makedirs("data/mturk/input", exist_ok=True)  # Ensure dummy input dir exists
 
     dummy_mturk_input_path = "data/mturk/input/dummy_mturk_tasks_for_processing.csv"
-    if not os.path.exists(dummy_mturk_input_path):
-        print(f"Creating dummy MTurk input for processing: {dummy_mturk_input_path}")
+    # Use the global MTURK_INPUT_PROCESSED_PATH for consistency
+    if not os.path.exists(MTURK_INPUT_PROCESSED_PATH):
+        print(f"Creating dummy MTurk input for processing: {MTURK_INPUT_PROCESSED_PATH}")
         dummy_input_data = pd.DataFrame(
             [
                 {
                     "agreement_id": "AGR001",
-                    "llm_validity_from": "2023/01/01",
-                    "llm_valid_to": "2023/12/31",
-                    "llm_impacted_agreements_justified_json": json.dumps(
-                        [{"impacted_agreement_title": "SubA", "justification": "LLM just for SubA"}]
-                    ),
+                    "system_validity_from": "2023/01/01",  # Name as in data_prep output
+                    "system_valid_to": "2023/12/31",  # Name as in data_prep output
+                    "system_impacted_agreements_string": '"SubA", "SubB"',  # Name as in data_prep output
                 },
                 {
                     "agreement_id": "AGR002",
-                    "llm_validity_from": "2024/XX/XX",
-                    "llm_valid_to": "Indefinite",
-                    "llm_impacted_agreements_justified_json": json.dumps([]),
+                    "system_validity_from": "2024/XX/XX",
+                    "system_valid_to": "Indefinite",
+                    "system_impacted_agreements_string": '""',  # Empty string
                 },
             ]
         )
-        dummy_input_data.to_csv(dummy_mturk_input_path, index=False)
+        dummy_input_data.to_csv(MTURK_INPUT_PROCESSED_PATH, index=False)
 
     if not os.path.exists(MTURK_OUTPUT_RAW_CSV_PATH):
         print(f"Creating dummy MTurk results file: {MTURK_OUTPUT_RAW_CSV_PATH}")
         dummy_results_data = [
-            {
+            {  # Worker 1 for AGR001
                 "agreement_id": "AGR001",
-                "human_validity_from_is_correct": "false",
+                "human_validity_from_is_correct": "false",  # Stored as string from MTurk
                 "human_validity_from_corrected": "2023/01/02",
-                "human_validity_from_correction_justification": "Off by one day.",
+                # "human_validity_from_correction_justification": "Off by one day.", # Removed
                 "human_valid_to_is_correct": "true",
-                "human_valid_to_corrected": pd.NA,
-                "human_valid_to_correction_justification": pd.NA,
+                "human_valid_to_corrected": pd.NA,  # Correctly NA if is_correct is true
+                # "human_valid_to_correction_justification": pd.NA, # Removed
                 "human_impacted_agreements_is_correct": "false",
-                "human_impacted_agreements_corrected_justified_json": json.dumps(
-                    [
-                        {
-                            "impacted_agreement_title": "SubA",
-                            "justification": "Corrected justification for SubA",
-                        },
-                        {"impacted_agreement_title": "SubB", "justification": "Added SubB"},
-                    ]
-                ),
+                # "human_impacted_agreements_corrected_justified_json": ..., # Removed
+                "human_impacted_agreements_corrected_string": '"SubA Corrected", "NewSub"',  # New field
                 "annotation_notes": "Worker 1 notes for AGR001",
             },
-            {
+            {  # Worker 2 for AGR001 - different opinions
                 "agreement_id": "AGR001",
                 "human_validity_from_is_correct": "true",
                 "human_validity_from_corrected": pd.NA,
-                "human_validity_from_correction_justification": pd.NA,
+                # "human_validity_from_correction_justification": pd.NA, # Removed
                 "human_valid_to_is_correct": "true",
                 "human_valid_to_corrected": pd.NA,
-                "human_valid_to_correction_justification": pd.NA,
+                # "human_valid_to_correction_justification": pd.NA, # Removed
                 "human_impacted_agreements_is_correct": "false",
-                "human_impacted_agreements_corrected_justified_json": json.dumps(
-                    [
-                        {
-                            "impacted_agreement_title": "SubA",
-                            "justification": "Corrected again for SubA",
-                        }
-                    ]
-                ),
+                "human_impacted_agreements_corrected_string": '"SubA Corrected"',  # Different correction
                 "annotation_notes": "Worker 2 notes for AGR001",
             },
-            {
+            {  # Worker 1 for AGR002
                 "agreement_id": "AGR002",
                 "human_validity_from_is_correct": "true",
                 "human_validity_from_corrected": pd.NA,
-                "human_validity_from_correction_justification": pd.NA,
+                # "human_validity_from_correction_justification": pd.NA, # Removed
                 "human_valid_to_is_correct": "false",
                 "human_valid_to_corrected": "2025/01/01",
-                "human_valid_to_correction_justification": "End date found.",
+                # "human_valid_to_correction_justification": "End date found.", # Removed
                 "human_impacted_agreements_is_correct": "true",
-                "human_impacted_agreements_corrected_justified_json": pd.NA,
+                "human_impacted_agreements_corrected_string": pd.NA,  # Correctly NA
                 "annotation_notes": "All good for AGR002",
             },
         ]
@@ -438,7 +458,9 @@ if __name__ == "__main__":
         "Running result processing script. Ensure input files exist or dummy files will be created:"
     )
     print(f"  MTurk Raw Results: {MTURK_OUTPUT_RAW_CSV_PATH}")
-    print(f"  Original LLM Data (from MTurk input): {dummy_mturk_input_path}")
+    print(f"  Original System Data (from MTurk input): {MTURK_INPUT_PROCESSED_PATH}")
     print(f"  Output Annotations CSV: {ANNOTATION_FILE_PATH}")
 
-    process_mturk_results(MTURK_OUTPUT_RAW_CSV_PATH, ANNOTATION_FILE_PATH, dummy_mturk_input_path)
+    process_mturk_results(
+        MTURK_OUTPUT_RAW_CSV_PATH, ANNOTATION_FILE_PATH, MTURK_INPUT_PROCESSED_PATH
+    )

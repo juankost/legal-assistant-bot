@@ -3,11 +3,13 @@ import os
 import sys
 import logging
 from mistralai import Mistral
+import tqdm
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.utils import retry_on_error  # noqa: E402
-from scraper.llm_scraper import call_gemini  # noqa: E402
-from preprocessing.prompts import AGREEMENT_VALIDITY_PROMPT  # noqa: E402
+from src.scraper.llm_scraper import call_gemini  # noqa: E402
+from src.preprocessing.prompts import AGREEMENT_VALIDITY_PROMPT  # noqa: E402
+from src.preprocessing.prompts import AGREEMENT_SUMMARY_PROMPT  # noqa: E402
 
 DATA_DIR = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data"
 
@@ -225,8 +227,76 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
     return results_df
 
 
+def get_agreements_summary(agreements_csv_path):
+    """
+    Generates a short summary for each agreement using an LLM.
+
+    Args:
+        agreements_csv_path: Path to CSV file containing agreement metadata
+    """
+    data = pd.read_csv(agreements_csv_path)
+
+    if "summary" not in data.columns:
+        data["summary"] = ""
+
+    for idx, row in tqdm.tqdm(data.iterrows(), total=len(data)):
+        # Skip if summary already exists
+        if pd.notna(row["summary"]) and row["summary"] != "":
+            print(f"Skipping agreement {row['agreement_id']}: Summary already exists")
+            continue
+
+        if "markdown_path" not in row or not row["markdown_path"] or pd.isna(row["markdown_path"]):
+            print(f"Skipping agreement {row['agreement_id']}: No valid markdown_path found")
+            continue
+
+        markdown_path = row["markdown_path"]
+        if not os.path.exists(markdown_path):
+            print(f"Skipping {markdown_path}: File not found")
+            continue
+
+        print(f"Processing agreement {row['agreement_id']}: {row['agreement_title']}")
+
+        # Read the markdown content (first 1000 characters only)
+        with open(markdown_path, "r") as f:
+            agreement_text = f.read(10000)
+
+        # Create prompt for LLM
+        prompt = AGREEMENT_SUMMARY_PROMPT.format(
+            title=row["agreement_title"],
+            text=agreement_text,
+        )
+
+        # Call Gemini to analyze the agreement
+        response_schema = {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string"},
+            },
+            "required": ["summary"],
+        }
+
+        analysis = call_gemini(
+            prompt=prompt,
+            model_name="gemini-2.5-flash-preview-04-17",
+            response_schema=response_schema,
+        )
+
+        if analysis and "summary" in analysis:
+            summary_text = analysis["summary"]
+            data.loc[idx, "summary"] = summary_text
+            print(f"  Summary generated for agreement {row['agreement_id']}")
+
+            # Save results after each agreement
+            data.to_csv(agreements_csv_path, index=False)
+        else:
+            print(f"  Failed to generate summary for agreement {row['agreement_id']}")
+
+    print(f"Summarization complete. Updated {agreements_csv_path}")
+    return data
+
+
 if __name__ == "__main__":
-    agreements_path = os.path.join(DATA_DIR, "raw", "agreement_metadata.csv")
+    agreements_path = os.path.join(DATA_DIR, "agreement_metadata.csv")
     output_dir = os.path.join(DATA_DIR, "markdown")
 
     # Add agreement_id to the metadata if needed
@@ -234,4 +304,5 @@ if __name__ == "__main__":
 
     # Process agreements
     # process_agreement_pdfs(agreements_path, output_dir)
-    get_agreements_validity_period(agreements_path, overwrite=False)
+    # get_agreements_validity_period(agreements_path, overwrite=False)
+    # get_agreements_summary(agreements_path)

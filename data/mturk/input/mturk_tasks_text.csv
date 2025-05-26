@@ -1,0 +1,6 @@
+radioName,agreement_id,agreement_title,agreement_text_url,system_validity_from,system_valid_to,system_impacted_agreements_string
+validation,0,2022 Commercials Contract Memorandum of Agreement,https://www.sagaftra.org/files/2022%20Commercials%20Contract%20Memorandum%20of%20Agreement_1.pdf,2022/04/01,2025/03/31,'2020 SAG-AFTRA/JPC Commercials Low Budget Digital Waiver'
+validation,1,2023 Low Budget Digital Waiver (LBDW),https://www.sagaftra.org/files/sa_documents/Low%20Budget%20Digital%20Waiver%202023%20Bulletin(170671.pdf,2023/04/01,2024/03/31,'2020 SAG-AFTRA/JPC Commercials Low Budget Digital Waiver'
+validation,2,2024 Low Budget Digital Waiver (LBDW),https://www.sagaftra.org/files/sa_documents/2024%20Low%20Budget%20Digital%20Waiver.pdf,2024/06/27,2025/03/31,"'2022 Commercials Contract Memorandum of Agreement', '2023 Low Budget Digital Waiver (LBDW)'"
+validation,3,2022 National Cable Waiver,https://www.sagaftra.org/files/sa_documents/2023%20Cable%20Sideletter(170654769.1).pdf,2022/12/22,,'2022 Commercials Contract Memorandum of Agreement'
+validation,4,2022 Political Commercial Waiver,https://www.sagaftra.org/files/sa_documents/2022%20SAG-AFTRA%20Political%20Commercial%20Waiver%20SAMPLE.pdf,2022/XX/XX,,
