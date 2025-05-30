@@ -15,7 +15,7 @@ ALL AGREEMENT TITLES IN COLLECTION:
 
 Please analyze the information and extract:
 
-1. VALIDITY_FROM: When does the agreement come into effect? (in YYYY/MM/DD format)
+1. VALID_FROM: When does the agreement come into effect? (in YYYY/MM/DD format)
    - Look for dates in the agreement text or title
    - Look for phrases like "effective date", "commencement date", etc.
    - If a year appears in the title, it likely indicates when the agreement was reached
@@ -40,7 +40,7 @@ IMPORTANT NOTES:
 
 Provide your analysis in a structured JSON format as follows:
 {{
-  "validity_from": "YYYY/MM/DD",
+  "valid_from": "YYYY/MM/DD",
   "valid_to": "YYYY/MM/DD",
   "impacted_agreements": ["Full Agreement Title 1", "Full Agreement Title 2"]
 }}

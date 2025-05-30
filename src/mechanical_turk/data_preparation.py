@@ -3,9 +3,9 @@ import pandas as pd
 import tqdm
 
 # Actual input datasets schema:
-# validity_analysis.csv: agreement_id,agreement_title,validity_from,valid_to,impacted_agreements
+# validity_analysis.csv: agreement_id,agreement_title,valid_from,valid_to,impacted_agreements
 # impacted_agreements has the format ["Title 1", "Title 2", ...]
-# validity_from and validity_to have format YYYY/MM/DD (or YYYY/MM/XX or YYYY/XX/XX)
+# valid_from and validity_to have format YYYY/MM/DD (or YYYY/MM/XX or YYYY/XX/XX)
 # the rest are strings
 
 # agreement_metadata.csv:agreement_id,agreement_title,agreement_url,agreement_info,category,subcategory,url,raw_path,markdown_path,agreement_id
@@ -43,7 +43,7 @@ def prepare_mturk_input_csv(
     mturk_data = []
     task_id_counter = 1
 
-    expected_input_validity_cols = ["validity_from", "valid_to", "impacted_agreements"]
+    expected_input_validity_cols = ["valid_from", "valid_to", "impacted_agreements"]
     assert all(
         col in df_merged.columns for col in expected_input_validity_cols
     ), "Error: Expected input columns not found in merged data."
@@ -55,7 +55,7 @@ def prepare_mturk_input_csv(
             "agreement_id": row["agreement_id"],
             "agreement_title": row.get("agreement_title", ""),
             "agreement_text_url": row["agreement_url"],
-            "system_validity_from": row.get("validity_from", pd.NA),
+            "system_validity_from": row.get("valid_from", pd.NA),
             "system_valid_to": row.get("valid_to", pd.NA),
             "system_impacted_agreements_string": row.get("impacted_agreements", "[]")[
                 1:-1

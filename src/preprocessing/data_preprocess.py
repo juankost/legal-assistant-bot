@@ -125,7 +125,7 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
             columns=[
                 "agreement_id",
                 "agreement_title",
-                "validity_from",
+                "valid_from",
                 "valid_to",
                 "impacted_agreements",
             ]
@@ -174,11 +174,11 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
         response_schema = {
             "type": "object",
             "properties": {
-                "validity_from": {"type": "string"},
+                "valid_from": {"type": "string"},
                 "valid_to": {"type": "string"},
                 "impacted_agreements": {"type": "array", "items": {"type": "string"}},
             },
-            "required": ["validity_from", "valid_to", "impacted_agreements"],
+            "required": ["valid_from", "valid_to", "impacted_agreements"],
         }
 
         analysis = call_gemini(
@@ -193,7 +193,7 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
             result = {
                 "agreement_id": agreement_id,
                 "agreement_title": row["agreement_title"],
-                "validity_from": analysis.get("validity_from", "Not specified"),
+                "valid_from": analysis.get("valid_from", "Not specified"),
                 "valid_to": analysis.get("valid_to", "Not specified"),
                 "impacted_agreements": analysis.get("impacted_agreements", []),
             }
@@ -210,9 +210,7 @@ def get_agreements_validity_period(agreements_csv_path, overwrite=False):
             results_df.to_csv(output_path, index=False)
             processed_ids.add(agreement_id)
 
-            print(
-                f"  Analysis complete: Valid from {result['validity_from']} to {result['valid_to']}"
-            )
+            print(f"  Analysis complete: Valid from {result['valid_from']} to {result['valid_to']}")
             if result["impacted_agreements"]:
                 impacted = ", ".join(result["impacted_agreements"][:2])
                 if len(result["impacted_agreements"]) > 2:

@@ -178,9 +178,47 @@ def process_markdown_files():
     # Add the validity information and impacted agreements to the metadata
     annotation_df = pd.read_csv(ANNOTATION_FILE_PATH)
     annotation_df = annotation_df[
-        ["agreement_id", "mturk_valid_from", "mturk_valid_to", "mturk_impacted_agreements"]
+        [
+            "agreement_id",
+            "valid_from",
+            "valid_to",
+            "impacted_agreements",
+            "mturk_valid_from",
+            "mturk_valid_to",
+            "mturk_impacted_agreements",
+        ]
     ]
     metadata_df = pd.merge(metadata_df, annotation_df, on="agreement_id", how="left")
+
+    # Ensure that we have full coverage for the annotations (i.e. valid_from, valid_to, impacted_agreements)
+    # Basically, if we have a validated mturk_valid_from, use that, otherwise use the valid_from
+    # same for valid_to and impacted_agreements
+    metadata_df["valid_from"] = metadata_df.apply(
+        lambda row: (
+            row["mturk_valid_from"]
+            if not (pd.isna(row["mturk_valid_from"]) or row["mturk_valid_from"] == "")
+            else row["valid_from"]
+        ),
+        axis=1,
+    )
+    metadata_df["valid_to"] = metadata_df.apply(
+        lambda row: (
+            row["mturk_valid_to"]
+            if not (pd.isna(row["mturk_valid_to"]) or row["mturk_valid_to"] == "")
+            else row["valid_to"]
+        ),
+        axis=1,
+    )
+    metadata_df["impacted_agreements"] = metadata_df.apply(
+        lambda row: (
+            row["mturk_impacted_agreements"]
+            if not (
+                pd.isna(row["mturk_impacted_agreements"]) or row["mturk_impacted_agreements"] == ""
+            )
+            else row["impacted_agreements"]
+        ),
+        axis=1,
+    )
 
     # Create a direct mapping from agreement_title to summary
     agreement_title_summary_dict = pd.Series(
@@ -210,7 +248,7 @@ def process_markdown_files():
             chunk_hash = create_chunk_hash(chunk_text)
 
             # Ensure mturk_impacted_agreements is passed correctly
-            impacted_agreements_input = row["mturk_impacted_agreements"]
+            impacted_agreements_input = row["impacted_agreements"]
             enriched_impacted_agreements_list = get_summaries_of_impacted_agreements(
                 impacted_agreements_input, agreement_title_summary_dict
             )
@@ -227,8 +265,8 @@ def process_markdown_files():
                 "chunk_text": chunk_text,
                 "previous_context": chunk_dict["previous_context"],
                 "following_context": chunk_dict["following_context"],
-                "valid_from": row["mturk_valid_from"],
-                "valid_to": row["mturk_valid_to"],
+                "valid_from": row["valid_from"],
+                "valid_to": row["valid_to"],
                 "impacted_agreements": enriched_impacted_agreements_list,
                 "chunk_hash": chunk_hash,
                 "total_chunks": len(chunks),
