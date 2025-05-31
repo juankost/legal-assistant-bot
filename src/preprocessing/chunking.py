@@ -9,6 +9,10 @@ from tqdm import tqdm
 from typing import List, Dict, Any
 from thefuzz import process
 import ast
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import impute_missing_valid_from, impute_missing_valid_to
 
 ROOT_DIR = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot"
 METADATA_PATH = os.path.join(ROOT_DIR, "data", "agreement_metadata.csv")
@@ -193,32 +197,36 @@ def process_markdown_files():
     # Ensure that we have full coverage for the annotations (i.e. valid_from, valid_to, impacted_agreements)
     # Basically, if we have a validated mturk_valid_from, use that, otherwise use the valid_from
     # same for valid_to and impacted_agreements
-    metadata_df["valid_from"] = metadata_df.apply(
-        lambda row: (
-            row["mturk_valid_from"]
-            if not (pd.isna(row["mturk_valid_from"]) or row["mturk_valid_from"] == "")
-            else row["valid_from"]
-        ),
-        axis=1,
-    )
-    metadata_df["valid_to"] = metadata_df.apply(
-        lambda row: (
-            row["mturk_valid_to"]
-            if not (pd.isna(row["mturk_valid_to"]) or row["mturk_valid_to"] == "")
-            else row["valid_to"]
-        ),
-        axis=1,
-    )
-    metadata_df["impacted_agreements"] = metadata_df.apply(
-        lambda row: (
-            row["mturk_impacted_agreements"]
-            if not (
-                pd.isna(row["mturk_impacted_agreements"]) or row["mturk_impacted_agreements"] == ""
-            )
-            else row["impacted_agreements"]
-        ),
-        axis=1,
-    )
+    # metadata_df["valid_from"] = metadata_df.apply(
+    #     lambda row: (
+    #         row["mturk_valid_from"]
+    #         if not (pd.isna(row["mturk_valid_from"]) or row["mturk_valid_from"] == "")
+    #         else row["valid_from"]
+    #     ),
+    #     axis=1,
+    # )
+    # metadata_df["valid_to"] = metadata_df.apply(
+    #     lambda row: (
+    #         row["mturk_valid_to"]
+    #         if not (pd.isna(row["mturk_valid_to"]) or row["mturk_valid_to"] == "")
+    #         else row["valid_to"]
+    #     ),
+    #     axis=1,
+    # )
+    # metadata_df["impacted_agreements"] = metadata_df.apply(
+    #     lambda row: (
+    #         row["mturk_impacted_agreements"]
+    #         if not (
+    #             pd.isna(row["mturk_impacted_agreements"]) or row["mturk_impacted_agreements"] == ""
+    #         )
+    #         else row["impacted_agreements"]
+    #     ),
+    #     axis=1,
+    # )
+
+    # Replace the empty strings of valid_from with the earliest date
+    metadata_df = impute_missing_valid_from(metadata_df)
+    metadata_df = impute_missing_valid_to(metadata_df)
 
     # Create a direct mapping from agreement_title to summary
     agreement_title_summary_dict = pd.Series(

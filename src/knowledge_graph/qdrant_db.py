@@ -9,6 +9,7 @@ from datetime import datetime
 import openai
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import uuid
 
 load_dotenv()
 
@@ -26,10 +27,10 @@ class QdrantDB:
     def __init__(
         self,
         collection_name: str = "sftra_agreements",
-        qdrant_uri: str = ":memory:",  # can be :memory:, a local path, or a URL
+        qdrant_path: str = ":memory:",  # can be :memory:, a local path, or a URL
     ):
         self.collection_name = collection_name
-        self.client = QdrantClient(qdrant_uri)
+        self.client = QdrantClient(path=qdrant_path)
         try:
             self.client.get_collection(collection_name=self.collection_name)
         except Exception:
@@ -38,6 +39,12 @@ class QdrantDB:
         self.valid_from_col = "valid_from"
         self.valid_to_col = "valid_to"
         self.openai_client = openai.OpenAI()
+
+    def load_collection(self, data_path: str):
+        self.client.load_collection(
+            collection_name=self.collection_name,
+            path=data_path,
+        )
 
     def create_collection_with_temporal_payload(self):
         self.client.create_collection(
@@ -56,12 +63,6 @@ class QdrantDB:
             field_schema=models.PayloadSchemaType.INTEGER,
         )
 
-    def load_collection(self, data_path: str):
-        self.client.load_collection(
-            collection_name=self.collection_name,
-            path=data_path,
-        )
-
     def add_document_to_collection(self, json_doc: dict):
 
         embedding_vector = self.embed_chunk(json_doc)
@@ -69,7 +70,10 @@ class QdrantDB:
         valid_to = json_doc[self.valid_to_col]
         valid_from_timestamp = self.convert_date_to_timestamp(valid_from)
         valid_to_timestamp = self.convert_date_to_timestamp(valid_to)
-        doc_id = f"{json_doc['agreement_id']}_{json_doc['chunk_id']}"
+
+        # Generate a deterministic UUID for the document ID
+        unique_name_for_id = f"{json_doc['agreement_id']}_{json_doc['chunk_index']}"
+        doc_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, unique_name_for_id))
 
         self.client.upsert(
             collection_name=self.collection_name,
@@ -103,7 +107,11 @@ class QdrantDB:
             if file.endswith(".json"):
                 with open(os.path.join(folder_path, file), "r") as f:
                     json_doc = json.load(f)
-                    self.add_document_to_collection(json_doc)
+                    try:
+                        self.add_document_to_collection(json_doc)
+                    except Exception as e:
+                        print(f"Error adding document {file}: {e}")
+                        continue
 
     def embed_chunk(self, json_doc: dict):
         full_context = f"{json_doc['previous_context']} {json_doc['chunk_text']} {json_doc['following_context']}"  # noqa
@@ -151,14 +159,21 @@ class QdrantDB:
         else:
             query_filter = None
 
+        start_time = time.time()
+        query_vector = self.embed_text(query.query)
+        end_time = time.time()
+        print(f"Time taken to embed text: {end_time - start_time} seconds")
+
+        start_time = time.time()
         search_result = self.client.search(
             collection_name=self.collection_name,
-            query_vector=query.query,
+            query_vector=query_vector,
             query_filter=query_filter,
             limit=config.top_k,
             with_payload=True,
         )
-
+        end_time = time.time()
+        print(f"Time taken to search: {end_time - start_time} seconds")
         return search_result
 
 
@@ -166,5 +181,16 @@ if __name__ == "__main__":
 
     # Test the QdranDB class on my local machine using the chunked data
     chunks_dir = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data/chunks"
-    qdrant_db = QdrantDB()
-    qdrant_db.add_folder_to_collection(chunks_dir)
+    qdrant_path = "/Users/juankostelec/Google_drive/Projects/legal-assistant-bot/data/qdrant_db"
+    qdrant_db = QdrantDB(qdrant_path=qdrant_path)
+    # qdrant_db.add_folder_to_collection(chunks_dir)
+
+    # Test retrieving a document
+    query = QueryModel(
+        query="What is the validity of the agreement for the Commercials?", date=None
+    )
+    config = QueryConfig(top_k=1)
+    import time
+
+    result = qdrant_db.retrieve(query, config)
+    print(result)

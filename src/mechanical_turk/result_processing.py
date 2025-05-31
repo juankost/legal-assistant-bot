@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from collections import Counter
 import numpy as np
+from src.utils import impute_missing_valid_from, impute_missing_valid_to
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -96,67 +97,6 @@ def get_consensus_value(series):
     ):
         return most_common_items[0][0]
     return pd.NA  # Or some other indicator of disagreement / tie
-
-
-def impute_missing_valid_from(annotation_df, valid_from_col="valid_from"):
-    # The data should be in format: Not specified or YYYY/MM/DD (or XX if missing some of hte vlaues)
-    annotation_df[valid_from_col] = annotation_df[valid_from_col].fillna(value="")
-    imputed_valid_from_list = []
-    for valid_from in annotation_df[valid_from_col]:
-        if valid_from == "Not specified":
-            imputed_valid_from_list.append("1990/01/01")  # some random very early date
-        else:
-            if valid_from == "":
-                imputed_valid_from_list.append("1990/01/01")
-                continue
-            valid_from_parts = valid_from.split("/")
-            if valid_from_parts[0] == "XXXX":
-                imputed_valid_from_list.append("1990/01/01")
-                continue
-            else:
-                new_valid_from_str = f"{valid_from_parts[0]}"
-                if valid_from_parts[1] == "XX":
-                    new_valid_from_str += "/01"
-                else:
-                    new_valid_from_str += f"/{valid_from_parts[1]}"
-                if valid_from_parts[2] == "XX":
-                    new_valid_from_str += "/01"
-                else:
-                    new_valid_from_str += f"/{valid_from_parts[2]}"
-                imputed_valid_from_list.append(new_valid_from_str)
-    annotation_df["valid_from"] = imputed_valid_from_list
-    return annotation_df
-
-
-def impute_missing_valid_to(annotation_df, valid_to_col="valid_to"):
-    # The data should be in format: Not specified or YYYY/MM/DD (or XX if missing some of hte vlaues)
-    annotation_df[valid_to_col] = annotation_df[valid_to_col].fillna(value="")
-
-    imputed_valid_to_list = []
-    for valid_to in annotation_df[valid_to_col]:
-        if valid_to == "Not specified":
-            imputed_valid_to_list.append("2050/01/01")  # some random very late date
-        else:
-            if valid_to == "":
-                imputed_valid_to_list.append("2050/01/01")
-                continue
-            valid_to_parts = valid_to.split("/")
-            if valid_to_parts[0] == "XXXX":
-                imputed_valid_to_list.append("2050/01/01")
-                continue
-            else:
-                new_valid_to_str = f"{valid_to_parts[0]}"
-                if valid_to_parts[1] == "XX":
-                    new_valid_to_str += "/12"
-                else:
-                    new_valid_to_str += f"/{valid_to_parts[1]}"
-                if valid_to_parts[2] == "XX":
-                    new_valid_to_str += "/27"  # Towards end of any month
-                else:
-                    new_valid_to_str += f"/{valid_to_parts[2]}"
-                imputed_valid_to_list.append(new_valid_to_str)
-    annotation_df["valid_to"] = imputed_valid_to_list
-    return annotation_df
 
 
 def process_mturk_results(
