@@ -1,6 +1,7 @@
 from qdrant_client import QdrantClient, models
 import tqdm
 import os
+import time
 import json
 import re
 from pydantic import BaseModel
@@ -16,7 +17,7 @@ load_dotenv()
 
 class QueryModel(BaseModel):
     query: str
-    date: Optional[datetime] = None
+    date: Optional[str] = None
 
 
 class QueryConfig(BaseModel):

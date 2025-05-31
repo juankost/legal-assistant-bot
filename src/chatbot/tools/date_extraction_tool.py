@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import re
 import google.genai as genai
 from dotenv import load_dotenv
 from smolagents import Tool
@@ -26,7 +26,7 @@ class DateExtractionTool(Tool):
         self.client = genai.Client()  # Initialize the client
         self.model_name = "gemini-2.5-flash-preview-05-20"  # Store model name
 
-    def forward(self, query: str) -> str:
+    def forward(self, query: str) -> str:  # noqa
         current_date_str = datetime.now().strftime("%Y/%m/%d")
         prompt = f"""
         You are provided a chat conversation between a user and an agent about a SAG-AFTRA agreement.
@@ -47,7 +47,7 @@ class DateExtractionTool(Tool):
         If no specific temporal context can be confidently extracted, return a single whitespace character " ".
         
         Return ONLY the date in YYYY/MM/DD format or the single whitespace character " ". No other explanatory text.
-        """
+        """  # noqa
 
         try:
             response = self.client.models.generate_content(model=self.model_name, contents=prompt)
@@ -55,12 +55,18 @@ class DateExtractionTool(Tool):
 
             if not result:  # If Gemini returns an empty string
                 return None
+
+            if not re.search(r"\d{4}/\d{2}/\d{2}", result):
+                print(
+                    "⚠️ Warning: Incorrect date format extracted from the query. "
+                    f"Extracted date: {result}. Defaulting to current date instead!"
+                )
+                return None  # None will be treated as current date by the TemporalRetrievalTool
+
             return result
 
         except Exception as e:
-            print(
-                f"Error using Gemini for date extraction: {e}. Defaulting to None for error indication."
-            )
+            print(f"🚨 Error in date extraction: {e}. " f"Defaulting to None for error indication.")
             return None
 
 
